@@ -53,7 +53,6 @@ class DeltaDistribution(Distribution):
 
 @register_kl(DeltaDistribution, DeltaDistribution)
 def _kl_delta_delta(p, q):
-    # KL(Delta || Delta) = 0, если loc совпадают, иначе +inf
     loc_match = torch.all(p.loc == q.loc)
     return torch.where(
         loc_match,
@@ -63,12 +62,10 @@ def _kl_delta_delta(p, q):
 
 @register_kl(DeltaDistribution, Distribution)
 def _kl_delta_other(p, q):
-    # KL(Delta || q) = -log q.prob(p.loc)
     return -q.log_prob(p.loc)
 
 @register_kl(Distribution, DeltaDistribution)
 def _kl_other_delta(p, q):
-    # KL(p || Delta) = +inf, если p не является Delta с тем же loc
     if isinstance(p, DeltaDistribution):
         return _kl_delta_delta(p, q)
     else:
